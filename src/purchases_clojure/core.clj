@@ -21,15 +21,21 @@
                        purchases)
         purchases (walk/keywordize-keys purchases)
         _ (println "Search for purchases by category")
-        input (read-line)
-        purchases (filter (fn [line]
+        ;input (read-line)
+        #_purchases #_(filter (fn [line]
                             (= input (:category line)))
                           purchases)]
-    (spit "filtered-purchases.edn"
-          (pr-str purchases)))
-  )
+    #_(spit "filtered-purchases.edn"
+          (pr-str purchases))
+    purchases))
 
-(defn purchases-html []
+(defn purchase-item [purchase-map]
+  [:p
+   [:b (:category purchase-map)]
+   " "
+   [:i (:credit_card purchase-map)]])
+
+#_(defn purchases-html []
   (let [purchases (read-purchases)]
     (map purchases)))
 
@@ -37,8 +43,8 @@
   {:status 200
    :header {"Content-Type" "text/html"}
    :body (h/html [:html
-                  :body
-                  (purchases-html)])})
+                  [:body
+                   (map purchase-item (read-purchases))]])})
 
 (defn -main [& args]
   (j/run-jetty #'handler {:port 3000 :join? false}))
