@@ -1,9 +1,11 @@
 (ns purchases-clojure.core
   (:require [clojure.string :as str]
-            [clojure.walk :as walk])
+            [clojure.walk :as walk]
+            [ring.adapter.jetty :as j]
+            [hiccup.core :as h])
   (:gen-class))
 
-(defn -main [& args]
+(defn read-purchases []
   (let [purchases (slurp "purchases.csv")
         purchases (str/split-lines purchases)
         purchases (map (fn [line]
@@ -24,4 +26,19 @@
                             (= input (:category line)))
                           purchases)]
     (spit "filtered-purchases.edn"
-          (pr-str purchases))))
+          (pr-str purchases)))
+  )
+
+(defn purchases-html []
+  (let [purchases (read-purchases)]
+    (map purchases)))
+
+(defn handler [request]
+  {:status 200
+   :header {"Content-Type" "text/html"}
+   :body (h/html [:html
+                  :body
+                  (purchases-html)])})
+
+(defn -main [& args]
+  (j/run-jetty #'handler {:port 3000 :join? false}))
